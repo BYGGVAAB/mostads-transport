@@ -1003,6 +1003,42 @@
           }
         );
 
+      /* ===== RAPPORTFÄLT ===== */
+
+      const reportSections = [
+        {
+          checkbox: 'usePallet',
+          fields: 'palletFields'
+        },
+        {
+          checkbox: 'useBom',
+          fields: 'bomFields'
+        },
+        {
+          checkbox: 'useWaiting',
+          fields: 'waitingFields'
+        },
+        {
+          checkbox: 'useDamage',
+          fields: 'damageFields'
+        }
+      ];
+
+      reportSections.forEach(section => {
+        const checkbox = $(section.checkbox);
+        const fields = $(section.fields);
+
+        checkbox.addEventListener('change', () => {
+          if (checkbox.checked) {
+            fields.classList.remove('hidden');
+          } else {
+            fields.classList.add('hidden');
+          }
+        });
+      });
+
+      /* ===== SLUT RAPPORTFÄLT ===== */
+      
       $('logoutBtn')
         .addEventListener(
           'click',
