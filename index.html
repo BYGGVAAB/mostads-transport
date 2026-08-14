@@ -285,7 +285,181 @@
       .welcome-grid {
         grid-template-columns: 1fr;
       }
-    }
+
+      /* ===== KÖRNINGSFORMULÄR ===== */
+
+.transport-input,
+.transport-textarea {
+  width: 100%;
+  padding: 15px 16px;
+  border: 2px solid var(--line);
+  border-radius: 15px;
+  background: #fff;
+  color: var(--text);
+  font-size: 18px;
+  outline: none;
+}
+
+.transport-input:focus,
+.transport-textarea:focus {
+  border-color: var(--blue);
+  box-shadow:
+    0 0 0 4px
+    rgba(18, 85, 217, 0.08);
+}
+
+.transport-textarea {
+  resize: vertical;
+}
+
+.order-number-input {
+  margin-top: 10px;
+  font-size: 21px;
+  font-weight: 850;
+}
+
+.report-card {
+  padding: 0;
+  overflow: hidden;
+}
+
+.report-toggle {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 20px;
+  cursor: pointer;
+}
+
+.report-toggle > input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.report-toggle-box {
+  display: grid;
+  flex: 0 0 27px;
+  width: 27px;
+  height: 27px;
+  place-items: center;
+  border: 2px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+}
+
+.report-toggle input:checked +
+.report-toggle-box {
+  border-color: var(--blue);
+  background: var(--blue);
+}
+
+.report-toggle input:checked +
+.report-toggle-box::after {
+  content: "✓";
+  color: #fff;
+  font-size: 18px;
+  font-weight: 950;
+}
+
+.report-toggle strong {
+  display: block;
+  font-size: 20px;
+  font-weight: 950;
+}
+
+.report-toggle small {
+  display: block;
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 650;
+  line-height: 1.35;
+}
+
+.report-fields {
+  display: grid;
+  grid-template-columns:
+    minmax(130px, 0.35fr)
+    minmax(0, 1fr);
+  gap: 14px;
+  padding: 18px 20px 20px;
+  border-top: 1px solid var(--line);
+  background: var(--soft);
+}
+
+.report-fields label {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.waiting-input-wrap {
+  position: relative;
+}
+
+.waiting-input-wrap .transport-input {
+  padding-right: 58px;
+}
+
+.waiting-input-wrap span {
+  position: absolute;
+  top: 50%;
+  right: 16px;
+  color: var(--muted);
+  font-weight: 900;
+  transform: translateY(-50%);
+}
+
+.send-transport-btn {
+  width: 100%;
+  margin-top: 4px;
+  padding: 20px;
+  border: 0;
+  border-radius: 18px;
+  background: var(--green);
+  color: #fff;
+  font-size: 23px;
+  font-weight: 950;
+  cursor: pointer;
+  box-shadow:
+    0 10px 22px
+    rgba(22, 163, 74, 0.22);
+}
+
+.send-transport-btn:active {
+  transform: translateY(1px);
+  background: var(--green-dark);
+}
+
+.send-transport-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+@media (max-width: 720px) {
+  .report-toggle {
+    padding: 17px;
+  }
+
+  .report-toggle strong {
+    font-size: 19px;
+  }
+
+  .report-fields {
+    grid-template-columns: 1fr;
+    padding: 16px;
+  }
+
+  .order-number-input {
+    font-size: 19px;
+  }
+}
+
+/* ===== SLUT KÖRNINGSFORMULÄR ===== */
   </style>
 </head>
 
@@ -404,19 +578,233 @@
     </div>
 
     <div
-      id="driverPlaceholder"
-      class="card hidden"
-    >
+  id="driverPlaceholder"
+  class="hidden"
+>
+
+  <form id="transportForm">
+
+    <!-- ORDERNUMMER -->
+    <div class="card">
       <div class="section-title">
         Ny körning
       </div>
 
       <p class="muted">
-        Nästa steg blir formuläret för
-        ordernummer, bytespall, bom,
-        väntetid och skador/defekter.
+        Ange ordernumret för den körning du rapporterar.
       </p>
+
+      <input
+        id="orderNumber"
+        class="transport-input order-number-input"
+        type="text"
+        inputmode="numeric"
+        placeholder="Ordernummer, t.ex. 204569"
+        autocomplete="off"
+        required
+      >
     </div>
+
+
+    <!-- BYTESPALL -->
+    <div class="card report-card">
+      <label class="report-toggle">
+        <input
+          id="usePallet"
+          type="checkbox"
+        >
+
+        <span class="report-toggle-box"></span>
+
+        <span>
+          <strong>Bytespall</strong>
+          <small>
+            Rapportera pall som inte lämnats ut eller annan pallavvikelse.
+          </small>
+        </span>
+      </label>
+
+      <div
+        id="palletFields"
+        class="report-fields hidden"
+      >
+        <label>
+          Antal
+          <input
+            id="palletQuantity"
+            class="transport-input"
+            type="number"
+            min="1"
+            step="1"
+            inputmode="numeric"
+            placeholder="T.ex. 13"
+          >
+        </label>
+
+        <label>
+          Kommentar
+          <textarea
+            id="palletComment"
+            class="transport-textarea"
+            rows="3"
+            placeholder="T.ex. De lämnar inte ut bytespall"
+          ></textarea>
+        </label>
+      </div>
+    </div>
+
+
+    <!-- BOM -->
+    <div class="card report-card">
+      <label class="report-toggle">
+        <input
+          id="useBom"
+          type="checkbox"
+        >
+
+        <span class="report-toggle-box"></span>
+
+        <span>
+          <strong>Bom</strong>
+          <small>
+            Rapportera bomkörning.
+          </small>
+        </span>
+      </label>
+
+      <div
+        id="bomFields"
+        class="report-fields hidden"
+      >
+        <label>
+          Antal
+          <input
+            id="bomQuantity"
+            class="transport-input"
+            type="number"
+            min="1"
+            step="1"
+            inputmode="numeric"
+            value="1"
+          >
+        </label>
+
+        <label>
+          Kommentar
+          <textarea
+            id="bomComment"
+            class="transport-textarea"
+            rows="3"
+            placeholder="T.ex. Ingen på plats"
+          ></textarea>
+        </label>
+      </div>
+    </div>
+
+
+    <!-- VÄNTETID -->
+    <div class="card report-card">
+      <label class="report-toggle">
+        <input
+          id="useWaiting"
+          type="checkbox"
+        >
+
+        <span class="report-toggle-box"></span>
+
+        <span>
+          <strong>Väntetid</strong>
+          <small>
+            Rapportera väntetid på aktuell order.
+          </small>
+        </span>
+      </label>
+
+      <div
+        id="waitingFields"
+        class="report-fields hidden"
+      >
+        <label>
+          Väntetid
+          <div class="waiting-input-wrap">
+            <input
+              id="waitingHours"
+              class="transport-input"
+              type="number"
+              min="0"
+              step="0.25"
+              inputmode="decimal"
+              placeholder="T.ex. 1"
+            >
+            <span>tim</span>
+          </div>
+        </label>
+
+        <label>
+          Kommentar
+          <textarea
+            id="waitingComment"
+            class="transport-textarea"
+            rows="3"
+            placeholder="T.ex. Fel referensnummer"
+          ></textarea>
+        </label>
+      </div>
+    </div>
+
+
+    <!-- SKADA / DEFEKT -->
+    <div class="card report-card">
+      <label class="report-toggle">
+        <input
+          id="useDamage"
+          type="checkbox"
+        >
+
+        <span class="report-toggle-box"></span>
+
+        <span>
+          <strong>Skada / defekt</strong>
+          <small>
+            Rapportera skada eller fel på fordonet.
+          </small>
+        </span>
+      </label>
+
+      <div
+        id="damageFields"
+        class="report-fields hidden"
+      >
+        <label>
+          Kommentar
+          <textarea
+            id="damageComment"
+            class="transport-textarea"
+            rows="4"
+            placeholder="T.ex. Sidomarkering höger bak trasig"
+          ></textarea>
+        </label>
+      </div>
+    </div>
+
+
+    <!-- SKICKA -->
+    <button
+      id="sendTransportBtn"
+      class="send-transport-btn"
+      type="submit"
+    >
+      SKICKA RAPPORT
+    </button>
+
+    <div
+      id="transportMessage"
+      class="message"
+    ></div>
+
+  </form>
+
+</div>
 
     <div
       id="adminPlaceholder"
