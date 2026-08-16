@@ -554,20 +554,27 @@
         chaufför och fordon.
       </p>
 
-      <div class="welcome-grid">
+    <div class="welcome-grid">
 
-        <div class="info-box">
-          <span>Chaufför</span>
-          <strong id="profileName">–</strong>
-        </div>
+  <div class="info-box">
+    <span id="profileNameLabel">Chaufför</span>
+    <strong id="profileName">–</strong>
+  </div>
 
-        <div class="info-box">
-          <span>Fordon</span>
-          <strong id="profileVehicle">–</strong>
-        </div>
+  <div class="info-box">
+    <span id="profileVehicleLabel">Fordon</span>
+    <strong id="profileVehicle">–</strong>
+  </div>
 
-      </div>
+  <div
+    id="profileLocationBox"
+    class="info-box hidden"
+  >
+    <span>Plats</span>
+    <strong id="profileLocation">–</strong>
+  </div>
 
+</div>
       <div
         id="profileRole"
         class="role-badge"
@@ -881,9 +888,9 @@
       async function loadProfile(user) {
         const { data, error } = await db
           .from('profiles')
-          .select(
-            'id,display_name,vehicle_number,role,active'
-          )
+         .select(
+  'id,display_name,vehicle_number,location,role,active'
+)
           .eq('id', user.id)
           .single();
 
@@ -911,14 +918,41 @@
           currentProfile.display_name;
 
         $('profileName').textContent =
-          currentProfile.display_name;
+  currentProfile.display_name;
 
-        $('profileVehicle').textContent =
-          currentProfile.vehicle_number || '–';
+$('profileVehicle').textContent =
+  currentProfile.vehicle_number || '–';
 
-        $('profileRole').textContent =
-          roleLabel(currentProfile.role);
+$('profileRole').textContent =
+  roleLabel(currentProfile.role);
 
+if (currentProfile.role === 'admin') {
+  $('profileNameLabel').textContent =
+    'Inloggad som';
+
+  $('profileVehicleLabel').textContent =
+    'ID / Enhet';
+
+  if (currentProfile.location) {
+    $('profileLocation').textContent =
+      currentProfile.location;
+
+    $('profileLocationBox')
+      .classList.remove('hidden');
+  } else {
+    $('profileLocationBox')
+      .classList.add('hidden');
+  }
+} else {
+  $('profileNameLabel').textContent =
+    'Chaufför';
+
+  $('profileVehicleLabel').textContent =
+    'Fordon';
+
+  $('profileLocationBox')
+    .classList.add('hidden');
+}
         if (currentProfile.role === 'admin') {
           $('adminPlaceholder')
             .classList.remove('hidden');
