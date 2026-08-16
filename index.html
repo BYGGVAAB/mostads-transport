@@ -1067,6 +1067,127 @@ if (currentProfile.role === 'admin') {
       });
 
       /* ===== SLUT RAPPORTFÄLT ===== */
+
+/* ===== SKICKA KÖRNINGSRAPPORT ===== */
+
+$('transportForm').addEventListener('submit', async event => {
+  event.preventDefault();
+
+  const button = $('sendTransportBtn');
+  const messageBox = $('transportMessage');
+
+  messageBox.classList.remove('show', 'ok', 'error');
+  messageBox.textContent = '';
+
+  const orderNumber = $('orderNumber').value.trim();
+
+  const hasPallet = $('usePallet').checked;
+  const hasBom = $('useBom').checked;
+  const hasWaiting = $('useWaiting').checked;
+  const hasDamage = $('useDamage').checked;
+
+  if (!orderNumber) {
+    messageBox.textContent = 'Ange ordernummer.';
+    messageBox.classList.add('show', 'error');
+    return;
+  }
+
+  if (!hasPallet && !hasBom && !hasWaiting && !hasDamage) {
+    messageBox.textContent = 'Välj minst en rapporttyp.';
+    messageBox.classList.add('show', 'error');
+    return;
+  }
+
+  const waitingHours = Number(
+    $('waitingHours').value || 0
+  );
+
+  const waitingMinutes =
+    hasWaiting
+      ? Math.round(waitingHours * 60)
+      : null;
+
+  button.disabled = true;
+  button.textContent = 'SKICKAR...';
+
+  try {
+    const payload = {
+      p_order_number: orderNumber,
+
+      p_has_pallet: hasPallet,
+      p_pallet_quantity: hasPallet
+        ? Number($('palletQuantity').value || 0)
+        : null,
+      p_pallet_comment: hasPallet
+        ? $('palletComment').value.trim() || null
+        : null,
+
+      p_has_bom: hasBom,
+      p_bom_quantity: hasBom
+        ? Number($('bomQuantity').value || 0)
+        : null,
+      p_bom_comment: hasBom
+        ? $('bomComment').value.trim() || null
+        : null,
+
+      p_has_waiting: hasWaiting,
+      p_waiting_minutes: waitingMinutes,
+      p_waiting_comment: hasWaiting
+        ? $('waitingComment').value.trim() || null
+        : null,
+
+      p_has_damage: hasDamage,
+      p_damage_comment: hasDamage
+        ? $('damageComment').value.trim() || null
+        : null
+    };
+
+    const { data: reportId, error } = await db.rpc(
+      'create_run_report',
+      payload
+    );
+
+    if (error) {
+      throw error;
+    }
+
+    messageBox.textContent =
+      `Rapport #${reportId} har skickats.`;
+
+    messageBox.classList.add('show', 'ok');
+
+    /* Töm formuläret inför nästa körning */
+    $('transportForm').reset();
+
+    reportSections.forEach(section => {
+      $(section.fields).classList.add('hidden');
+    });
+
+    /* Bom ska återgå till antal 1 */
+    $('bomQuantity').value = '1';
+
+    /* Lägg fokus på nästa ordernummer */
+    $('orderNumber').focus();
+
+  } catch (error) {
+    console.error(
+      'Rapporten kunde inte skickas:',
+      error
+    );
+
+    messageBox.textContent =
+      error?.message ||
+      'Rapporten kunde inte skickas.';
+
+    messageBox.classList.add('show', 'error');
+
+  } finally {
+    button.disabled = false;
+    button.textContent = 'SKICKA RAPPORT';
+  }
+});
+
+/* ===== SLUT SKICKA KÖRNINGSRAPPORT ===== */
       
       $('logoutBtn')
         .addEventListener(
