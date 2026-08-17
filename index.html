@@ -460,6 +460,94 @@
 }
 
 /* ===== SLUT KÖRNINGSFORMULÄR ===== */
+
+/* ===== ADMINRAPPORTER ===== */
+
+.admin-report-list {
+  display: grid;
+  gap: 14px;
+}
+
+.admin-report-card {
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: #fff;
+  box-shadow:
+    0 8px 22px
+    rgba(40, 67, 110, 0.06);
+}
+
+.admin-report-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  align-items: flex-start;
+}
+
+.admin-report-order {
+  font-size: 20px;
+  font-weight: 950;
+}
+
+.admin-report-meta {
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.admin-report-time {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.admin-report-events {
+  display: grid;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.admin-event {
+  padding: 13px 14px;
+  border: 1px solid var(--line);
+  border-radius: 13px;
+  background: var(--soft);
+}
+
+.admin-event strong {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 15px;
+}
+
+.admin-event p {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.admin-empty {
+  padding: 26px;
+  text-align: center;
+  color: var(--muted);
+}
+
+@media (max-width: 600px) {
+  .admin-report-top {
+    flex-direction: column;
+  }
+
+  .admin-report-time {
+    white-space: normal;
+  }
+}
+
+/* ===== SLUT ADMINRAPPORTER ===== */
+      
   </style>
 </head>
 
@@ -808,19 +896,33 @@
 
 </div>
 
-    <div
-      id="adminPlaceholder"
-      class="card hidden"
-    >
-      <div class="section-title">
-        Administration
-      </div>
+  <div
+  id="adminPlaceholder"
+  class="hidden"
+>
 
+  <div class="card">
+    <div class="section-title">
+      Administration
+    </div>
+
+    <p class="muted">
+      Här visas alla inskickade körningar och avvikelser.
+    </p>
+  </div>
+
+  <div
+    id="adminReports"
+    class="admin-report-list"
+  >
+    <div class="card">
       <p class="muted">
-        Nästa steg blir adminöversikten
-        där alla inskickade körningar visas.
+        Inga rapporter har laddats ännu.
       </p>
     </div>
+  </div>
+
+</div>
 
   </div>
 
