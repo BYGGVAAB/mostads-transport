@@ -1068,6 +1068,207 @@ if (currentProfile.role === 'admin') {
         }
       }
 
+      /* ===== ADMINRAPPORTER ===== */
+
+function escapeHtml(value) {
+  return String(value ?? '')
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#039;');
+}
+
+function formatReportDate(value) {
+  if (!value) return '';
+
+  return new Intl.DateTimeFormat('sv-SE', {
+    dateStyle: 'medium',
+    timeStyle: 'short'
+  }).format(new Date(value));
+}
+
+async function loadAdminReports() {
+  if (currentProfile?.role !== 'admin') {
+    return;
+  }
+
+  const container = $('adminReports');
+
+  container.innerHTML = `
+    <div class="card">
+      <p class="muted">
+        Laddar rapporter...
+      </p>
+    </div>
+  `;
+
+  try {
+    const { data, error } = await db
+      .from('reports')
+      .select(`
+        id,
+        order_number,
+        has_pallet,
+        pallet_quantity,
+        pallet_comment,
+        has_bom,
+        bom_quantity,
+        bom_comment,
+        has_waiting,
+        waiting_minutes,
+        waiting_comment,
+        has_damage,
+        damage_comment,
+        driver_name_snapshot,
+        vehicle_number_snapshot,
+        created_at,
+        status
+      `)
+      .order('created_at', {
+        ascending: false
+      })
+      .limit(100);
+
+    if (error) {
+      throw error;
+    }
+
+    const reports = data || [];
+
+    if (!reports.length) {
+      container.innerHTML = `
+        <div class="card">
+          <div class="admin-empty">
+            Inga rapporter har skickats ännu.
+          </div>
+        </div>
+      `;
+      return;
+    }
+
+    container.innerHTML = reports.map(report => {
+      const events = [];
+
+      if (report.has_pallet) {
+        events.push(`
+          <div class="admin-event">
+            <strong>Bytespall</strong>
+            <div>
+              Antal:
+              ${Number(report.pallet_quantity || 0)}
+            </div>
+            ${
+              report.pallet_comment
+                ? `<p>${escapeHtml(report.pallet_comment)}</p>`
+                : ''
+            }
+          </div>
+        `);
+      }
+
+      if (report.has_bom) {
+        events.push(`
+          <div class="admin-event">
+            <strong>Bom</strong>
+            <div>
+              Antal:
+              ${Number(report.bom_quantity || 0)}
+            </div>
+            ${
+              report.bom_comment
+                ? `<p>${escapeHtml(report.bom_comment)}</p>`
+                : ''
+            }
+          </div>
+        `);
+      }
+
+      if (report.has_waiting) {
+        const minutes =
+          Number(report.waiting_minutes || 0);
+
+        const hours = minutes / 60;
+
+        events.push(`
+          <div class="admin-event">
+            <strong>Väntetid</strong>
+            <div>
+              ${hours.toLocaleString('sv-SE')} tim
+            </div>
+            ${
+              report.waiting_comment
+                ? `<p>${escapeHtml(report.waiting_comment)}</p>`
+                : ''
+            }
+          </div>
+        `);
+      }
+
+      if (report.has_damage) {
+        events.push(`
+          <div class="admin-event">
+            <strong>Skada / defekt</strong>
+            ${
+              report.damage_comment
+                ? `<p>${escapeHtml(report.damage_comment)}</p>`
+                : '<p>Ingen kommentar angiven.</p>'
+            }
+          </div>
+        `);
+      }
+
+      return `
+        <div class="admin-report-card">
+
+          <div class="admin-report-top">
+            <div>
+              <div class="admin-report-order">
+                Order #${escapeHtml(report.order_number)}
+              </div>
+
+              <div class="admin-report-meta">
+                ${escapeHtml(
+                  report.vehicle_number_snapshot || '–'
+                )}
+                ·
+                ${escapeHtml(
+                  report.driver_name_snapshot || '–'
+                )}
+              </div>
+            </div>
+
+            <div class="admin-report-time">
+              ${formatReportDate(report.created_at)}
+            </div>
+          </div>
+
+          <div class="admin-report-events">
+            ${events.join('')}
+          </div>
+
+        </div>
+      `;
+    }).join('');
+
+  } catch (error) {
+    console.error(
+      'Kunde inte ladda adminrapporter:',
+      error
+    );
+
+    container.innerHTML = `
+      <div class="card">
+        <div class="message error show">
+          Rapporterna kunde inte laddas.
+        </div>
+      </div>
+    `;
+  }
+}
+
+/* ===== SLUT ADMINRAPPORTER ===== */
+      
       async function startSession(user) {
         currentUser = user;
         currentProfile =
