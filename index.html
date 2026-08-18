@@ -1520,6 +1520,42 @@ $('transportForm').addEventListener('submit', async event => {
       throw error;
     }
 
+const reportTypes = [];
+
+if (hasPallet) reportTypes.push('Bytespall');
+if (hasBom) reportTypes.push('Bom');
+if (hasWaiting) reportTypes.push('Väntetid');
+if (hasDamage) reportTypes.push('Skada / defekt');
+
+try {
+  const { error: notificationError } =
+    await db.functions.invoke(
+      'send-report-notification',
+      {
+        body: {
+          orderNumber,
+          driverName:
+            currentProfile?.display_name || '',
+          vehicleNumber:
+            currentProfile?.vehicle_number || '',
+          reportTypes
+        }
+      }
+    );
+
+  if (notificationError) {
+    console.error(
+      'Notisen kunde inte skickas:',
+      notificationError
+    );
+  }
+} catch (notificationError) {
+  console.error(
+    'Fel vid notifiering:',
+    notificationError
+  );
+}
+    
     messageBox.textContent =
       `Rapport #${reportId} har skickats.`;
 
