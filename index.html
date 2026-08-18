@@ -1286,14 +1286,59 @@ async function loadAdminReports() {
 }
 
 /* ===== SLUT ADMINRAPPORTER ===== */
-      
-      async function startSession(user) {
-        currentUser = user;
-        currentProfile =
-          await loadProfile(user);
 
-        showApp();
+/* ===== ONESIGNAL USER ===== */
+
+async function connectOneSignalUser(user) {
+  if (!user?.id) {
+    return;
+  }
+
+  try {
+    window.OneSignalDeferred =
+      window.OneSignalDeferred || [];
+
+    window.OneSignalDeferred.push(
+      async function(OneSignal) {
+
+        await OneSignal.login(user.id);
+
+        if (currentProfile) {
+          await OneSignal.User.addTags({
+            role: currentProfile.role || '',
+            name: currentProfile.display_name || '',
+            vehicle:
+              currentProfile.vehicle_number || ''
+          });
+        }
+
+        console.log(
+          'OneSignal kopplad till användare:',
+          user.id
+        );
       }
+    );
+
+  } catch (error) {
+    console.error(
+      'OneSignal kunde inte kopplas:',
+      error
+    );
+  }
+}
+
+/* ===== SLUT ONESIGNAL USER ===== */
+      
+async function startSession(user) {
+  currentUser = user;
+
+  currentProfile =
+    await loadProfile(user);
+
+  await connectOneSignalUser(user);
+
+  showApp();
+}
 
       $('loginForm')
         .addEventListener(
@@ -1517,6 +1562,14 @@ $('transportForm').addEventListener('submit', async event => {
         .addEventListener(
           'click',
           async () => {
+            window.OneSignalDeferred =
+  window.OneSignalDeferred || [];
+
+window.OneSignalDeferred.push(
+  async function(OneSignal) {
+    await OneSignal.logout();
+  }
+);
             await db.auth.signOut();
 
             currentUser = null;
