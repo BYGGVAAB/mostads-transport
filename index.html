@@ -1528,7 +1528,14 @@ if (hasWaiting) reportTypes.push('Väntetid');
 if (hasDamage) reportTypes.push('Skada / defekt');
 
 try {
-  const { error: notificationError } =
+  console.log('Försöker skicka pushnotis...', {
+    orderNumber,
+    driverName: currentProfile?.display_name,
+    vehicleNumber: currentProfile?.vehicle_number,
+    reportTypes
+  });
+
+  const { data: notificationData, error: notificationError } =
     await db.functions.invoke(
       'send-report-notification',
       {
@@ -1542,6 +1549,11 @@ try {
         }
       }
     );
+
+  console.log('Svar från notification function:', {
+    data: notificationData,
+    error: notificationError
+  });
 
   if (notificationError) {
     console.error(
