@@ -549,9 +549,24 @@
 /* ===== SLUT ADMINRAPPORTER ===== */
       
   </style>
-
+  
   <link rel="manifest" href="./manifest.json">
 <link rel="apple-touch-icon" href="./mostads-icon.png">
+
+<script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+<script>
+  window.OneSignalDeferred = window.OneSignalDeferred || [];
+  OneSignalDeferred.push(async function(OneSignal) {
+    await OneSignal.init({
+      appId: "ca6ee07e-9b49-4165-9151-57408d999a4b",
+      safari_web_id: "web.onesignal.auto.4d0b3421-6847-4c4b-a531-b4bcf634e4d8",
+      notifyButton: {
+        enable: true,
+      },
+    });
+  });
+</script>
+  
 </head>
 
 <body>
