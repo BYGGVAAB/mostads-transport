@@ -547,6 +547,26 @@
 }
 
 /* ===== SLUT ADMINRAPPORTER ===== */
+
+/* ===== SKADEBILD ===== */
+
+.damage-photo-field {
+  grid-column: 1 / -1;
+}
+
+.damage-photo-field input[type="file"] {
+  padding: 11px;
+  background: #fff;
+  cursor: pointer;
+}
+
+.damage-photo-field small {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 650;
+}
+
+/* ===== SLUT SKADEBILD ===== */
       
   </style>
   
@@ -892,6 +912,18 @@
             placeholder="T.ex. Sidomarkering höger bak trasig"
           ></textarea>
         </label>
+         <label class="damage-photo-field">
+      Bild på skada / defekt
+      <input
+        id="damagePhoto"
+        class="transport-input"
+        type="file"
+        accept="image/*"
+      >
+      <small>
+        Ta en bild eller välj en befintlig bild.
+      </small>
+    </label>
       </div>
     </div>
 
