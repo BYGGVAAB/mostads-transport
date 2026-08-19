@@ -567,6 +567,25 @@
 }
 
 /* ===== SLUT SKADEBILD ===== */
+
+.damage-photo-link {
+  display: block;
+  margin-top: 12px;
+  color: var(--blue);
+  font-weight: 900;
+  text-decoration: none;
+}
+
+.damage-photo-preview {
+  display: block;
+  width: 100%;
+  max-width: 420px;
+  max-height: 260px;
+  margin-bottom: 7px;
+  border-radius: 12px;
+  object-fit: cover;
+  border: 1px solid var(--line);
+}
       
   </style>
   
@@ -1170,6 +1189,7 @@ async function loadAdminReports() {
         waiting_comment,
         has_damage,
         damage_comment,
+        photo_url,
         driver_name_snapshot,
         vehicle_number_snapshot,
         created_at,
@@ -1186,6 +1206,32 @@ async function loadAdminReports() {
 
     const reports = data || [];
 
+for (const report of reports) {
+  report.photoSignedUrl = null;
+
+  if (report.photo_url) {
+    const {
+      data: signedData,
+      error: signedError
+    } = await db.storage
+      .from('damage-photos')
+      .createSignedUrl(
+        report.photo_url,
+        60 * 60
+      );
+
+    if (signedError) {
+      console.error(
+        'Kunde inte skapa bildlänk:',
+        signedError
+      );
+    } else {
+      report.photoSignedUrl =
+        signedData.signedUrl;
+    }
+  }
+}
+    
     if (!reports.length) {
       container.innerHTML = `
         <div class="card">
@@ -1255,18 +1301,39 @@ async function loadAdminReports() {
         `);
       }
 
-      if (report.has_damage) {
-        events.push(`
-          <div class="admin-event">
-            <strong>Skada / defekt</strong>
-            ${
-              report.damage_comment
-                ? `<p>${escapeHtml(report.damage_comment)}</p>`
-                : '<p>Ingen kommentar angiven.</p>'
-            }
-          </div>
-        `);
+     if (report.has_damage) {
+  events.push(`
+    <div class="admin-event">
+      <strong>Skada / defekt</strong>
+
+      ${
+        report.damage_comment
+          ? `<p>${escapeHtml(report.damage_comment)}</p>`
+          : '<p>Ingen kommentar angiven.</p>'
       }
+
+      ${
+        report.photoSignedUrl
+          ? `
+            <a
+              href="${report.photoSignedUrl}"
+              target="_blank"
+              rel="noopener"
+              class="damage-photo-link"
+            >
+              <img
+                src="${report.photoSignedUrl}"
+                alt="Bild på skada eller defekt"
+                class="damage-photo-preview"
+              >
+              <span>Öppna bilden</span>
+            </a>
+          `
+          : ''
+      }
+    </div>
+  `);
+}
 
       return `
         <div class="admin-report-card">
