@@ -463,6 +463,49 @@
 
 /* ===== ADMINRAPPORTER ===== */
 
+.admin-report-filters {
+  display: flex;
+  gap: 8px;
+  margin: 0 0 16px;
+  flex-wrap: wrap;
+}
+
+.admin-report-filter {
+  border: 1px solid #d1d5db;
+  background: #ffffff;
+  color: #374151;
+  padding: 9px 15px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.admin-report-filter:hover {
+  background: #f3f4f6;
+}
+
+.admin-report-filter.active {
+  background: #111827;
+  color: #ffffff;
+  border-color: #111827;
+}
+
+#newReportsCount {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  margin-left: 4px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: #dc2626;
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 700;
+}
+      
 .admin-report-list {
   display: grid;
   gap: 14px;
@@ -1030,6 +1073,32 @@
     </p>
   </div>
 
+<div class="admin-report-filters">
+  <button
+    type="button"
+    class="admin-report-filter active"
+    data-report-filter="new"
+  >
+    Nya <span id="newReportsCount">0</span>
+  </button>
+
+  <button
+    type="button"
+    class="admin-report-filter"
+    data-report-filter="all"
+  >
+    Alla
+  </button>
+
+  <button
+    type="button"
+    class="admin-report-filter"
+    data-report-filter="handled"
+  >
+    Hanterade
+  </button>
+</div>
+    
   <div
     id="adminReports"
     class="admin-report-list"
@@ -1080,7 +1149,8 @@
 
       let currentUser = null;
       let currentProfile = null;
-
+let adminReportFilter = 'new';
+      
       function showLoginMessage(message) {
         const box = $('loginMessage');
 
@@ -1284,19 +1354,51 @@ for (const report of reports) {
     }
   }
 }
-    
-    if (!reports.length) {
-      container.innerHTML = `
-        <div class="card">
-          <div class="admin-empty">
-            Inga rapporter har skickats ännu.
-          </div>
-        </div>
-      `;
-      return;
-    }
 
-    container.innerHTML = reports.map(report => {
+const newReports =
+  reports.filter(report =>
+    report.status !== 'hanterad'
+  );
+
+$('newReportsCount').textContent =
+  newReports.length;
+
+let visibleReports = reports;
+
+if (adminReportFilter === 'new') {
+  visibleReports = newReports;
+}
+
+if (adminReportFilter === 'handled') {
+  visibleReports =
+    reports.filter(report =>
+      report.status === 'hanterad'
+    );
+}
+    
+if (!visibleReports.length) {
+  let emptyMessage = 'Inga rapporter har skickats ännu.';
+
+  if (adminReportFilter === 'new') {
+    emptyMessage = 'Inga nya rapporter.';
+  }
+
+  if (adminReportFilter === 'handled') {
+    emptyMessage = 'Inga hanterade rapporter.';
+  }
+
+  container.innerHTML = `
+    <div class="card">
+      <div class="admin-empty">
+        ${emptyMessage}
+      </div>
+    </div>
+  `;
+
+  return;
+}
+
+    container.innerHTML = visibleReports.map(report => {
       const events = [];
 
       if (report.has_pallet) {
@@ -1508,6 +1610,34 @@ async function connectOneSignalUser(user) {
 }
 
 /* ===== SLUT ONESIGNAL USER ===== */
+
+      /* ===== ADMINFILTER ===== */
+
+document
+  .querySelector('.admin-report-filters')
+  .addEventListener('click', async event => {
+    const button =
+      event.target.closest('.admin-report-filter');
+
+    if (!button) {
+      return;
+    }
+
+    adminReportFilter =
+      button.dataset.reportFilter;
+
+    document
+      .querySelectorAll('.admin-report-filter')
+      .forEach(filterButton => {
+        filterButton.classList.remove('active');
+      });
+
+    button.classList.add('active');
+
+    await loadAdminReports();
+  });
+
+/* ===== SLUT ADMINFILTER ===== */
 
 /* ===== MARKERA RAPPORT SOM HANTERAD ===== */
 
