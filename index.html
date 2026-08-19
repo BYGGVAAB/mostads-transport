@@ -1552,6 +1552,54 @@ $('transportForm').addEventListener('submit', async event => {
       throw error;
     }
 
+/* ===== LADDA UPP SKADEBILD ===== */
+
+const damageFile =
+  hasDamage
+    ? $('damagePhoto').files?.[0]
+    : null;
+
+if (damageFile) {
+  const fileExtension =
+    damageFile.name.split('.').pop()?.toLowerCase() || 'jpg';
+
+  const filePath =
+    `${currentUser.id}/${reportId}-${Date.now()}.${fileExtension}`;
+
+  const {
+    error: uploadError
+  } = await db.storage
+    .from('damage-photos')
+    .upload(
+      filePath,
+      damageFile,
+      {
+        cacheControl: '3600',
+        upsert: false
+      }
+    );
+
+  if (uploadError) {
+    throw uploadError;
+  }
+
+  const {
+    error: photoUpdateError
+  } = await db
+    .from('reports')
+    .update({
+      photo_url: filePath
+    })
+    .eq('id', reportId)
+    .eq('created_by', currentUser.id);
+
+  if (photoUpdateError) {
+    throw photoUpdateError;
+  }
+}
+
+/* ===== SLUT LADDA UPP SKADEBILD ===== */
+    
 const reportTypes = [];
 
 if (hasPallet) reportTypes.push('Bytespall');
