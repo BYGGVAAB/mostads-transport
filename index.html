@@ -586,6 +586,56 @@
   object-fit: cover;
   border: 1px solid var(--line);
 }
+
+      /* ===== RAPPORTSTATUS ===== */
+
+.admin-report-actions {
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+}
+
+.admin-handle-btn {
+  width: 100%;
+  padding: 14px 16px;
+  border: 0;
+  border-radius: 13px;
+  background: var(--blue);
+  color: #fff;
+  font-weight: 950;
+  cursor: pointer;
+}
+
+.admin-handle-btn:hover {
+  background: var(--blue-dark);
+}
+
+.admin-handle-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.admin-handled {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 13px 14px;
+  border-radius: 13px;
+  background: #eaf8ef;
+  color: #137333;
+}
+
+.admin-handled strong {
+  font-size: 15px;
+  font-weight: 950;
+}
+
+.admin-handled span {
+  font-size: 13px;
+  font-weight: 750;
+}
+
+/* ===== SLUT RAPPORTSTATUS ===== */
       
   </style>
   
@@ -1193,7 +1243,10 @@ async function loadAdminReports() {
         driver_name_snapshot,
         vehicle_number_snapshot,
         created_at,
-        status
+        status,
+        handled_at,
+handled_by,
+handled_by_name
       `)
       .order('created_at', {
         ascending: false
@@ -1364,6 +1417,36 @@ for (const report of reports) {
             ${events.join('')}
           </div>
 
+<div class="admin-report-actions">
+  ${
+    report.status === 'hanterad'
+  ? `
+    <div class="admin-handled">
+      <strong>✓ Hanterad</strong>
+      <span>
+        ${escapeHtml(report.handled_by_name || 'Admin')}
+        ${
+          report.handled_at
+            ? ` · ${formatReportDate(report.handled_at)}`
+            : ''
+        }
+      </span>
+    </div>
+  `
+      `
+      : `
+        <button
+          type="button"
+          class="admin-handle-btn"
+          data-report-id="${report.id}"
+          data-order-number="${escapeHtml(report.order_number)}"
+        >
+          Markera som hanterad
+        </button>
+      `
+  }
+</div>
+
         </div>
       `;
     }).join('');
@@ -1427,6 +1510,71 @@ async function connectOneSignalUser(user) {
 }
 
 /* ===== SLUT ONESIGNAL USER ===== */
+
+/* ===== MARKERA RAPPORT SOM HANTERAD ===== */
+
+$('adminReports').addEventListener('click', async event => {
+  const button =
+    event.target.closest('.admin-handle-btn');
+
+  if (!button) {
+    return;
+  }
+
+  const reportId =
+    Number(button.dataset.reportId);
+
+  const orderNumber =
+    button.dataset.orderNumber || '';
+
+  const confirmed = window.confirm(
+    `Markera order #${orderNumber} som hanterad?\n\n` +
+    `Tidpunkt och administratör kommer att sparas.`
+  );
+
+  if (!confirmed) {
+    return;
+  }
+
+  button.disabled = true;
+  button.textContent = 'SPARAR...';
+
+  try {
+    const { error } = await db
+      .from('reports')
+      .update({
+  status: 'hanterad',
+  handled_at: new Date().toISOString(),
+  handled_by: currentUser.id,
+  handled_by_name:
+    currentProfile?.display_name || 'Admin'
+})
+      .eq('id', reportId);
+
+    if (error) {
+      throw error;
+    }
+
+    await loadAdminReports();
+
+  } catch (error) {
+    console.error(
+      'Rapporten kunde inte markeras som hanterad:',
+      error
+    );
+
+    alert(
+      error?.message ||
+      'Rapporten kunde inte markeras som hanterad.'
+    );
+
+    button.disabled = false;
+    button.textContent =
+      'Markera som hanterad';
+  }
+});
+
+/* ===== SLUT MARKERA RAPPORT SOM HANTERAD ===== */
       
 async function startSession(user) {
   currentUser = user;
