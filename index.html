@@ -1418,8 +1418,7 @@ for (const report of reports) {
           </div>
 
 <div class="admin-report-actions">
-  ${
-    report.status === 'hanterad'
+  ${report.status === 'hanterad'
   ? `
     <div class="admin-handled">
       <strong>✓ Hanterad</strong>
@@ -1433,18 +1432,17 @@ for (const report of reports) {
       </span>
     </div>
   `
-      `
-      : `
-        <button
-          type="button"
-          class="admin-handle-btn"
-          data-report-id="${report.id}"
-          data-order-number="${escapeHtml(report.order_number)}"
-        >
-          Markera som hanterad
-        </button>
-      `
-  }
+  : `
+    <button
+      type="button"
+      class="admin-handle-btn"
+      data-report-id="${report.id}"
+      data-order-number="${escapeHtml(report.order_number)}"
+    >
+      Markera som hanterad
+    </button>
+  `
+}
 </div>
 
         </div>
